@@ -5,14 +5,10 @@ class Vue {
     methods,
     mounted
   }) {
-    this.data = data
     this.dom = document.querySelector(el)
     this._html = this.dom.innerHTML
 
-    // 数据绑定，在 set 时做渲染
-    Object.keys(this.data).forEach(k => {
-      this.observer(this.data, k, data[k])
-    })
+    this.observer(data)
 
     // 将 data 里的数据收集到 this
     Object.keys(this.data).forEach(k => {
@@ -37,7 +33,24 @@ class Vue {
     mounted.bind(this)()
   }
 
-  observer (object, k, v) {
+  observer (object) {
+    // this.data = object
+    // Object.keys(object).forEach(k => {
+    //   this.defineReactive(object, k, object[k])
+    // })
+    const _this = this
+    this.data = new Proxy(object, {
+      get: function (target, key, receiver) {
+        return Reflect.get(target, key, receiver)
+      },
+      set: function (target, key, value, receiver) {
+        _this.render()
+        return Reflect.set(target, key, value, receiver)
+      }
+    })
+  }
+
+  defineReactive (object, k, v) {
     Object.defineProperty(object, k, {
       get: () => {
         return v
@@ -47,10 +60,11 @@ class Vue {
         this.render()
         return newV
       }
-    })   
+    })
   }
 
   render () {
+    console.log('rendering')
     // 没有使用 VNode，性能很差的渲染，每次遍历整个 HTML 文档
     const regExp = /\{(.*)\}/g
     const matched = this._html.match(regExp)

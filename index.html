@@ -19,15 +19,20 @@
       data: {
         a: 1,
         b: 2,
-        c: 3
+        c: 3,
+        d: 4
       },
       methods: {
         test () {
           this.a = 10
+        },
+        test2 () {
+          this.d = 11
         }
       },
       mounted () {
         this.test()
+        this.test2()
       }
     })
   </script>
